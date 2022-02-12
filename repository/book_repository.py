@@ -1,7 +1,5 @@
-from array import array
 from models.book_entity import BookEntity
 from db.data import book_data
-from util.dict_to_book import dict_to_book
 
 books = book_data.get("books")
 
@@ -19,14 +17,14 @@ def get_book_by_isbn(isbn: str):
 
 
 def create_book(book: BookEntity):
-    books.append(book.__dict__)
+    books.append(book.dict())
     return book
 
 
-def update_book(book: BookEntity):
-
-    books[books.index(get_book_by_isbn(book.isbn))] = book.__dict__
-    return book
+def update_book(isbn: str, book: BookEntity):
+    index = books.index(get_book_by_isbn(isbn))
+    books[index].update(book.dict(exclude_unset=True))
+    return books[index]
 
 
 def delete_book(isbn: str):

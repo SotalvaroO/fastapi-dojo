@@ -1,7 +1,5 @@
-from array import array
 from fastapi import APIRouter, status, Response
-from models.book_entity import BookEntity
-from db.data import book_data
+from models.book_entity import BookEntity, BookEntityUpdate
 from repository import book_repository
 
 route = APIRouter(prefix='/book', tags=['book'])
@@ -9,16 +7,14 @@ route = APIRouter(prefix='/book', tags=['book'])
 
 @route.get('', status_code=200)
 def get_books(response: Response):
-    books: array[BookEntity] = book_repository.get_all_books()
-    if not books:
-        response.status_code = status.HTTP_204_NO_CONTENT
+    books = book_repository.get_all_books()
     response.status_code = status.HTTP_200_OK
     return {"message": "Obtenido con exito", "status_code": 200, "body": books}
 
 
 @route.get('/{isbn}', status_code=200)
 def get_book_by_isbn(isbn: str, response: Response):
-    book: BookEntity = book_repository.get_book_by_isbn(isbn)
+    book = book_repository.get_book_by_isbn(isbn)
     if not book:
         response.status_code = status.HTTP_404_NOT_FOUND
         return {"message": "Not found", "status_code": 404}
@@ -38,13 +34,13 @@ def create_book(book: BookEntity, response: Response):
     return {"message": "El elemento ya existe", "status_code": 400}
 
 
-@route.put('', status_code=200)
-def update_book(book: BookEntity, response: Response):
-    book_db = book_repository.get_book_by_isbn(book.isbn)
+@route.put('/{isbn}', status_code=200)
+def update_book(isbn: str ,book: BookEntityUpdate, response: Response):
+    book_db = book_repository.get_book_by_isbn(isbn)
     if not book_db:
         response.status_code = status.HTTP_404_NOT_FOUND
         return {"message": "El elemento no existe", "status_code": 404}
-    book_db = book_repository.update_book(book)
+    book_db = book_repository.update_book(isbn,book)
     response.status_code = status.HTTP_200_OK
     return {"message": "Actualizado", "status_code": 200, "body": book_db}
 
